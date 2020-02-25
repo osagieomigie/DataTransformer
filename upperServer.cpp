@@ -1,9 +1,10 @@
 /* Simple program to demonstrate a UDP-based server.
  * Loops forever.
  * Receives a word from the client. 
- * Reverses the word and sends it back to the client.
+ * Changes the word to UPPER CASE back to the client.
+ * sends response back to client.
  * 
- * Compile using "g++ -o reserveServer reserveServer.cpp"
+ * Compile using "g++ -o upperServer upperServer.cpp"
  */
 
 /* Include files */
@@ -11,6 +12,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string.h>
+#include <cctype>
 #include <stack>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -26,13 +28,12 @@
 
 using namespace std;
 
-string reverseArr(string tmp)
+string upperArr(string tmp)
 {
     int end = tmp.length();
-
-    for (int i = 0; i < end / 2; i++)
+    for (int i = 0; i < end; i++)
     {
-        swap(tmp[i], tmp[end - i - 1]);
+        tmp[i] = toupper(tmp[i]);
     }
     return tmp;
 }
@@ -90,7 +91,7 @@ int main()
 
         // reverse messagein buffer
         string tmp = string(messagein);
-        string tmpResult = reverseArr(tmp);
+        string tmpResult = upperArr(tmp);
         strcpy(messageout, tmpResult.c_str());
         messageout[readBytes] = '\0';
 

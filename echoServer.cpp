@@ -17,7 +17,7 @@
 #include <arpa/inet.h>
 
 /* Manifest constants */
-#define MAX_BUFFER_SIZE 40
+#define MAX_BUFFER_SIZE 20000
 #define PORT 12345
 
 /* Verbose debugging */

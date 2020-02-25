@@ -9,5 +9,6 @@ test*
 *.out
 echoServer
 reverseServer
+upperServer
 
 .DS_Store 
