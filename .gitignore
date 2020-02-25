@@ -2,8 +2,12 @@
 *.o
 *.obj
 test*
+.vscode 
 
 # Executables
 *.exe
 *.out
 echoServer
+reverseServer
+
+.DS_Store 
