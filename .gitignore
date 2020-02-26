@@ -11,6 +11,8 @@ echoServer
 reverseServer
 upperServer
 lowerServer
-caserCipherServer
+caeserCipherServer
+masterServer
+masterClient 
 
 .DS_Store 

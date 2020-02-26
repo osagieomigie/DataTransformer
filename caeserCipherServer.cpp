@@ -93,7 +93,7 @@ int main()
         cout << "Could not bind to port " << PORT << endl;
         return 1;
     }
-    cout << stderr << "Welcome! I am the UDP reverse server!!" << endl;
+    cout << "Welcome! I am the UDP reverse server!!" << endl;
     cout << "server now listening on UDP port " << PORT << "..." << endl;
 
     /* big loop, looking for incoming messages from clients */
@@ -115,7 +115,7 @@ int main()
 #endif
         cout << "  server received " << messagein << " from IP " << inet_ntoa(si_client.sin_addr) << "port " << ntohs(si_client.sin_port) << endl;
 
-        // reverse messagein buffer
+        // encode messagein buffer
         string tmp = string(messagein);
         string tmpResult = caeserCipher(tmp);
         strcpy(messageout, tmpResult.c_str());
