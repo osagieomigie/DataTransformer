@@ -10,5 +10,7 @@ test*
 echoServer
 reverseServer
 upperServer
+lowerServer
+caserCipherServer
 
 .DS_Store 
