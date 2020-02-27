@@ -20,8 +20,8 @@
 #include <arpa/inet.h>
 
 /* Manifest constants */
-#define MAX_BUFFER_SIZE 20000
-#define PORT 12345
+#define MAX_BUFFER_SIZE 200000
+#define PORT 9092
 
 /* Verbose debugging */
 #define DEBUG 1

@@ -1,11 +1,9 @@
-/* TCP-based client example of socket programming.    */
-/* This client interacts with the word length server, */
+//TCP-based client
+/* This client interacts with the master server,      */
 /* which needs to be running first.                   */
 /*                                                    */
-/* Usage: cc -o wordlen-TCPclient wordlen-TCPclient.c */
-/*        ./wordlen-TCPclient                         */
-/*                                                    */
-/* Written by Carey Williamson       January 13, 2012 */
+/* Usage: cc -o masterClient masterClient.cpp */
+/*        ./masterClient                              */
 
 /* Include files for C socket programming and stuff */
 #include <stdio.h>
@@ -23,8 +21,9 @@ void perror(const char *s);
 
 /* Manifest constants used by client program */
 #define MAX_HOSTNAME_LENGTH 64
-#define MAX_WORD_LENGTH 100
+#define MAX_WORD_LENGTH 200000
 #define BYNAME 0
+#define VALID_ENTRY 1
 #define MYPORTNUM 12345 /* must match the server's port! */
 
 /* Menu selections */
@@ -45,9 +44,9 @@ void printmenu()
     cout << "   You can use the micro services, by selecting 1 or more of the following, or exit to quit" << endl;
     cout << "       1. Echo service" << endl;
     cout << "       2. Reverse service" << endl;
-    cout << "       3. upper service" << endl;
-    cout << "       4. lower service" << endl;
-    cout << "       5. caeser cipher service" << endl;
+    cout << "       3. Upper case service" << endl;
+    cout << "       4. Lower case service" << endl;
+    cout << "       5. Caeser cipher service" << endl;
     cout << "       6. TBD service" << endl;
 }
 
@@ -57,11 +56,10 @@ int main()
     int sockfd, sockfd2;
     char c;
     struct sockaddr_in server;
-    struct hostent *hp;
-    char hostname[MAX_HOSTNAME_LENGTH];
     char message[MAX_WORD_LENGTH];
     char messageback[MAX_WORD_LENGTH];
-    int choice, len, bytes;
+    int choice, initialChoice, len, bytes;
+    string command;
 
     /* Initialization of server sockaddr data structure */
     memset(&server, 0, sizeof(server));
@@ -92,45 +90,82 @@ int main()
     /* main loop: read a word, send to server, and print answer received */
     while (choice != ALLDONE)
     {
-        if (choice == UPPER)
+        initialChoice = choice;
+        len = 0;
+
+        if (choice == ECHO)
         {
             /* get rid of newline after the (integer) menu choice given */
             c = getchar();
 
             /* prompt user for the input */
-            printf("Enter your word: ");
-            len = 2;
-            //cout << "choice: " << endl;
-            message[0] = '$3'; // encode microservice info
-            message[1] = '#';
-            while ((c = getchar()) != '\n')
-            {
-                message[len] = c;
-                len++;
-            }
-            /* make sure the message is null-terminated in C */
-            message[len] = '\0';
+            cout << "Enter your word: " << endl;
 
-            /* send it to the server via the socket */
-            send(sockfd, message, len, 0);
-
-            /* see what the server sends back */
-            if ((bytes = recv(sockfd, messageback, len, 0)) > 0)
-            {
-                /* make sure the message is null-terminated in C */
-                messageback[bytes] = '\0';
-                cout << "Answer received from server: " << messageback << endl;
-            }
-            else
-            {
-                /* an error condition if the server dies unexpectedly */
-                printf("Sorry, dude. Server failed!\n");
-                close(sockfd);
-                exit(1);
-            }
+            // encode microservice info
+            command = to_string(initialChoice) + "#";
+        }
+        else if (choice == REVERSE)
+        {
+            c = getchar();
+            cout << "Enter your word: " << endl;
+            command = to_string(initialChoice) + "#";
+        }
+        else if (choice == UPPER)
+        {
+            c = getchar();
+            cout << "Enter your word: " << endl;
+            command = to_string(initialChoice) + "#";
+        }
+        else if (choice == LOWER)
+        {
+            c = getchar();
+            cout << "Enter your word: " << endl;
+            command = to_string(initialChoice) + "#";
+        }
+        else if (choice == CAESER)
+        {
+            c = getchar();
+            cout << "Enter your word: " << endl;
+            command = to_string(initialChoice) + "#";
         }
         else
-            printf("Invalid menu selection. Please try again.\n");
+        {
+            c = getchar();
+            cout << "Enter your word: " << endl;
+            command = to_string(initialChoice) + "#";
+        }
+
+        while ((c = getchar()) != '\n')
+        {
+            message[len] = c;
+            len++;
+        }
+        /* make sure the message is null-terminated in C */
+        message[len] = '\0';
+
+        string stringMessage = string(message);
+
+        command += stringMessage;
+
+        //cout << "sending " << command << " to server" << endl;
+
+        /* send it to the server via the socket */
+        send(sockfd, command.data(), command.length(), 0);
+
+        /* see what the server sends back */
+        if ((bytes = recv(sockfd, messageback, len, 0)) > 0)
+        {
+            /* make sure the message is null-terminated in C */
+            messageback[bytes] = '\0';
+            cout << "Answer received from server: " << messageback << endl;
+        }
+        else
+        {
+            /* an error condition if the server dies unexpectedly */
+            cout << "Sorry, dude. Server failed! " << endl;
+            close(sockfd);
+            exit(1);
+        }
 
         printmenu();
         scanf("%d", &choice);

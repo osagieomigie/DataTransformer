@@ -20,20 +20,20 @@
 #include <arpa/inet.h>
 
 /* Manifest constants */
-#define MAX_BUFFER_SIZE 20000
-#define PORT 9090
+#define MAX_BUFFER_SIZE 200000
+#define PORT 9091
 
 /* Verbose debugging */
 #define DEBUG 1
 
 using namespace std;
 
-string upperArr(string tmp)
+string lowerArr(string tmp)
 {
     int end = tmp.length();
     for (int i = 0; i < end; i++)
     {
-        tmp[i] = toupper(tmp[i]);
+        tmp[i] = tolower(tmp[i]);
     }
     return tmp;
 }
@@ -67,7 +67,7 @@ int main()
         cout << "Could not bind to port " << PORT << endl;
         return 1;
     }
-    cout << "Welcome! I am the UDP reverse server!!" << endl;
+    cout << stderr << "Welcome! I am the UDP reverse server!!" << endl;
     cout << "server now listening on UDP port " << PORT << "..." << endl;
 
     /* big loop, looking for incoming messages from clients */
@@ -91,7 +91,7 @@ int main()
 
         // reverse messagein buffer
         string tmp = string(messagein);
-        string tmpResult = upperArr(tmp);
+        string tmpResult = lowerArr(tmp);
         strcpy(messageout, tmpResult.c_str());
         messageout[readBytes] = '\0';
 

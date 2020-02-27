@@ -1,7 +1,9 @@
 /*
- * A simple TCP server that echos messages back to the client.
- * This server works with only a single client.  With a simple modification, it can take more clients.
-* This example is adopted from CPSC 441 tutorials thought by Prof. Mea Wang 
+ * A Master TCP server that receives a message from its client.
+ * Uses a UDP socket to communicate with the micro services .
+ * 
+ * Usage: g++ -o masterServer masterServer.cpp
+ *        ./masterServer 
  */
 
 #include <iostream>
@@ -13,9 +15,12 @@
 #include <signal.h>
 
 #define MYPORTNUM 12345
-#define MAX_MESSAGE_LENGTH 100
-#define MAX_BUFFER_SIZE 40
+#define MAX_MESSAGE_LENGTH 200000
+#define ECHO 8990
+#define REVERSE 8991
 #define UPPER 9090
+#define LOWER 9091
+#define CAESER 9092
 
 // Configure IP address
 #define SERVER_IP "127.0.0.1"
@@ -35,18 +40,19 @@ void catcher(int sig)
     exit(0);
 }
 
+// UDP Client for micro services
 string microServiceSock(int port, string messageIn)
 {
     struct sockaddr_in si_server;
     struct sockaddr *server;
     int s, i = sizeof(si_server);
     socklen_t len = sizeof(si_server);
-    char buf[MAX_BUFFER_SIZE];
+    char buf[MAX_MESSAGE_LENGTH];
     int readBytes;
 
     if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
-        printf("Could not set up a socket!\n");
+        cout << "Could not set up a socket!" << endl;
         exit(-1);
     }
 
@@ -57,22 +63,22 @@ string microServiceSock(int port, string messageIn)
 
     if (inet_pton(AF_INET, SERVER_IP, &si_server.sin_addr) == 0)
     {
-        printf("inet_pton() failed\n");
+        cout << "inet_pton() failed " << endl;
         exit(-1);
     }
 
-    bzero(buf, MAX_BUFFER_SIZE);
+    bzero(buf, MAX_MESSAGE_LENGTH);
     strcpy(buf, messageIn.c_str());
 
     if (sendto(s, buf, strlen(buf), 0, server, sizeof(si_server)) == -1)
     {
-        printf("sendto failed\n");
+        cout << "sendto failed" << endl;
         exit(-1);
     }
 
-    if ((readBytes = recvfrom(s, buf, MAX_BUFFER_SIZE, 0, server, &len)) == -1)
+    if ((readBytes = recvfrom(s, buf, MAX_MESSAGE_LENGTH, 0, server, &len)) == -1)
     {
-        printf("Read error!\n");
+        cout << "Read error! " << endl;
         exit(-1);
     }
     buf[readBytes] = '\0'; // proper null-termination of string
@@ -128,16 +134,16 @@ int main()
         exit(1);
     }
 
-    /* initialize message strings just to be safe (null-terminated) */
-    bzero(messagein, MAX_MESSAGE_LENGTH);
-    bzero(messageout, MAX_MESSAGE_LENGTH);
-
     cout << "Welcome! I am the master server!! " << endl;
     cout << "server listening on TCP port " << MYPORTNUM << endl;
 
     /* Main loop: server loops forever listening for requests */
     for (;;)
     {
+        /* initialize message strings just to be safe (null-terminated) */
+        bzero(messagein, MAX_MESSAGE_LENGTH);
+        bzero(messageout, MAX_MESSAGE_LENGTH);
+
         /* accept a connection */
         if ((childsockfd = accept(parentsockfd, NULL, NULL)) == -1)
         {
@@ -165,30 +171,82 @@ int main()
             while (recv(childsockfd, messagein, MAX_MESSAGE_LENGTH, 0) > 0)
             {
                 /* print out the received message */
-                cout << "Child process received word: " << messagein << endl;
+                //cout << "Child process received word: " << messagein << endl;
 
-#ifdef DEBUG
-                printf("Child about to send message: %s\n", messageout);
-#endif
+                //cout << "initial message received: " << endl;
                 string tmpMessageIn = string(messagein);
-                cout << "tmpMessage: " << tmpMessageIn << endl;
-                //int startPos = tmpMessageIn.find("$");
+                //cout << "tmpMessage: " << tmpMessageIn << endl;
+
                 int endPos = tmpMessageIn.find("#");
                 string command = tmpMessageIn.substr(0, endPos);
                 string message = tmpMessageIn.substr(endPos + 1);
                 string returntoClient;
-                cout << "command: " << command << endl;
+                // cout << "command: " << command << endl;
+                // cout << "message: " << message << endl;
 
                 for (int i = 0; i < command.length(); i++)
                 {
-                    if (command[i] == '3')
+                    if (command[i] == '1')
                     {
-                        cout << "here" << endl;
-                        returntoClient = microServiceSock(UPPER, message);
+                        if (i > 0)
+                        {
+                            //cout << "i > 0; message: " << returntoClient << endl;
+                            returntoClient = microServiceSock(ECHO, returntoClient);
+                        }
+                        else
+                        {
+                            //cout << "else: message: " << message << endl;
+                            returntoClient = microServiceSock(ECHO, message);
+                        }
+                    }
+                    else if (command[i] == '2')
+                    {
+                        if (i > 0)
+                        {
+                            returntoClient = microServiceSock(REVERSE, returntoClient);
+                        }
+                        else
+                        {
+                            returntoClient = microServiceSock(REVERSE, message);
+                        }
+                    }
+                    else if (command[i] == '3')
+                    {
+                        if (i > 0)
+                        {
+                            returntoClient = microServiceSock(UPPER, returntoClient);
+                        }
+                        else
+                        {
+                            returntoClient = microServiceSock(UPPER, message);
+                        }
+                    }
+                    else if (command[i] == '4')
+                    {
+                        if (i > 0)
+                        {
+                            returntoClient = microServiceSock(LOWER, returntoClient);
+                        }
+                        else
+                        {
+                            returntoClient = microServiceSock(LOWER, message);
+                        }
+                    }
+                    else if (command[i] == '5')
+                    {
+                        if (i > 0)
+                        {
+                            returntoClient = microServiceSock(CAESER, returntoClient);
+                        }
+                        else
+                        {
+                            returntoClient = microServiceSock(CAESER, message);
+                        }
                     }
                 }
 
                 cout << "sending " << returntoClient.data() << " to TCP client" << endl;
+
                 /* send the result message back to the client */
                 if (send(childsockfd, returntoClient.data(), returntoClient.length(), 0) < 0)
                 {
@@ -208,8 +266,6 @@ int main()
         else
         {
             /* the parent process is the one doing the "else" part */
-            // fprintf(stderr, "Created child process %d to handle that client\n", pid);
-            // fprintf(stderr, "Parent going back to job of listening...\n\n");
 
             /* parent doesn't need the childsockfd */
             close(childsockfd);
