@@ -4,7 +4,7 @@
  * Uses a caser cipher to encode the word.
  * sends response back to client.
  * 
- * Compile using "g++ -o caserCipherServer caserCipherServer.cpp"
+ * Compile using "g++ -o caser caser.cpp"
  */
 
 /* Include files */
@@ -93,7 +93,7 @@ int main()
         cout << "Could not bind to port " << PORT << endl;
         return 1;
     }
-    cout << "Welcome! I am the UDP reverse server!!" << endl;
+    cout << "Welcome! I am the UDP caeser cipher server!!" << endl;
     cout << "server now listening on UDP port " << PORT << "..." << endl;
 
     /* big loop, looking for incoming messages from clients */

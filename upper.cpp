@@ -1,10 +1,10 @@
 /* Simple program to demonstrate a UDP-based server.
  * Loops forever.
  * Receives a word from the client. 
- * Changes the word to UPPER CASE back to the client.
+ * Changes the word to UPPER CASE.
  * sends response back to client.
  * 
- * Compile using "g++ -o upperServer upperServer.cpp"
+ * Compile using "g++ -o upper upper.cpp"
  */
 
 /* Include files */
@@ -67,7 +67,7 @@ int main()
         cout << "Could not bind to port " << PORT << endl;
         return 1;
     }
-    cout << "Welcome! I am the UDP reverse server!!" << endl;
+    cout << "Welcome! I am the UPPER CASE server!!" << endl;
     cout << "server now listening on UDP port " << PORT << "..." << endl;
 
     /* big loop, looking for incoming messages from clients */

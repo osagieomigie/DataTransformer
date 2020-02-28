@@ -3,7 +3,7 @@
  * Receives a word from the client. 
  * Echos the word back to the client.
  * 
- * Compile using "g++ -o echoServer echoServer.cpp"
+ * Compile using "g++ -o identity identity.cpp"
  */
 
 /* Include files */

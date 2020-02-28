@@ -2,8 +2,8 @@
 /* This client interacts with the master server,      */
 /* which needs to be running first.                   */
 /*                                                    */
-/* Usage: cc -o masterClient masterClient.cpp */
-/*        ./masterClient                              */
+/* Usage: cc -o masterclient masterclient.cpp */
+/*        ./masterclient                              */
 
 /* Include files for C socket programming and stuff */
 #include <stdio.h>
@@ -28,12 +28,6 @@ void perror(const char *s);
 
 /* Menu selections */
 #define ALLDONE 0
-#define ECHO 1
-#define REVERSE 2
-#define UPPER 3
-#define LOWER 4
-#define CAESER 5
-#define TBD 6
 
 using namespace std;
 
@@ -47,7 +41,7 @@ void printmenu()
     cout << "       3. Upper case service" << endl;
     cout << "       4. Lower case service" << endl;
     cout << "       5. Caeser cipher service" << endl;
-    cout << "       6. TBD service" << endl;
+    cout << "       6. Hash service" << endl;
 }
 
 /* Main program of client */
@@ -102,53 +96,21 @@ int main()
         }
         else
         {
-            if (choice == ECHO)
-            {
-                /* get rid of newline after the (integer) menu choice given */
-                c = getchar();
+            /* get rid of newline after the (integer) menu choice given */
+            c = getchar();
 
-                /* prompt user for the input */
-                cout << "Enter your word: " << endl;
+            // encode microservice info
+            command = to_string(initialChoice) + "#";
 
-                // encode microservice info
-                command = to_string(initialChoice) + "#";
-            }
-            else if (choice == REVERSE)
-            {
-                c = getchar();
-                cout << "Enter your word: " << endl;
-                command = to_string(initialChoice) + "#";
-            }
-            else if (choice == UPPER)
-            {
-                c = getchar();
-                cout << "Enter your word: " << endl;
-                command = to_string(initialChoice) + "#";
-            }
-            else if (choice == LOWER)
-            {
-                c = getchar();
-                cout << "Enter your word: " << endl;
-                command = to_string(initialChoice) + "#";
-            }
-            else if (choice == CAESER)
-            {
-                c = getchar();
-                cout << "Enter your word: " << endl;
-                command = to_string(initialChoice) + "#";
-            }
-            else
-            {
-                c = getchar();
-                cout << "Enter your word: " << endl;
-                command = to_string(initialChoice) + "#";
-            }
+            /* prompt user for the input */
+            cout << "Enter your word: " << endl;
 
             while ((c = getchar()) != '\n')
             {
                 message[len] = c;
                 len++;
             }
+
             /* make sure the message is null-terminated in C */
             message[len] = '\0';
 

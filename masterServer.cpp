@@ -2,7 +2,7 @@
  * A Master TCP server that receives a message from its client.
  * Uses a UDP socket to communicate with the micro services .
  * 
- * Usage: g++ -o masterServer masterServer.cpp
+ * Usage: g++ -o masterserver masterserver.cpp
  *        ./masterServer 
  */
 
@@ -21,6 +21,7 @@
 #define UPPER 9090
 #define LOWER 9091
 #define CAESER 9092
+#define HASH 9093
 
 // Configure IP address
 #define SERVER_IP "127.0.0.1"
@@ -237,6 +238,17 @@ int main()
                         else
                         {
                             returntoClient = microServiceSock(CAESER, message);
+                        }
+                    }
+                    else if (command[i] == '6')
+                    {
+                        if (i > 0)
+                        {
+                            returntoClient = microServiceSock(HASH, returntoClient);
+                        }
+                        else
+                        {
+                            returntoClient = microServiceSock(HASH, message);
                         }
                     }
                 }

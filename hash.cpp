@@ -1,9 +1,10 @@
 /* Simple program to demonstrate a UDP-based server.
  * Loops forever.
  * Receives a word from the client. 
- * Reverses the word and sends it back to the client.
+ * Uses a caser cipher to encode the word.
+ * sends response back to client.
  * 
- * Compile using "g++ -o reserve reserve.cpp"
+ * Compile using "g++ -o caser caser.cpp"
  */
 
 /* Include files */
@@ -11,6 +12,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string.h>
+#include <cctype>
 #include <stack>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,22 +21,42 @@
 
 /* Manifest constants */
 #define MAX_BUFFER_SIZE 200000
-#define PORT 8991
+#define PORT 9093
 
 /* Verbose debugging */
 #define DEBUG 1
 
 using namespace std;
 
-string reverseArr(string tmp)
+/*
+    A very simple hash function that encrypts a word based
+    on the position of the letters in the alphabet. 
+    It returns the total sum. 
+*/
+int hashFunction(string tmp)
 {
-    int end = tmp.length();
+    string upperAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    string lowerAlpha = "abcdefghijklmnopqrstuvwxyz";
+    int result = 0;
 
-    for (int i = 0; i < end / 2; i++)
+    const int alphaLength = 26;
+
+    int end = tmp.length();
+    for (int i = 0; i < tmp.length(); i++)
     {
-        swap(tmp[i], tmp[end - i - 1]);
+        if ((upperAlpha.find(tmp[i]) != string::npos) || (lowerAlpha.find(tmp[i]) != string::npos))
+        {
+            if (tmp[i] == tolower(tmp[i]))
+            {
+                result += lowerAlpha.find(tmp[i]);
+            }
+            else
+            {
+                result += upperAlpha.find(tmp[i]);
+            }
+        }
     }
-    return tmp;
+    return result;
 }
 
 /* Main program */
@@ -66,7 +88,7 @@ int main()
         cout << "Could not bind to port " << PORT << endl;
         return 1;
     }
-    cout << stderr << "Welcome! I am the UDP reverse server!!" << endl;
+    cout << "Welcome! I am the HASH server!!" << endl;
     cout << "server now listening on UDP port " << PORT << "..." << endl;
 
     /* big loop, looking for incoming messages from clients */
@@ -88,18 +110,17 @@ int main()
 #endif
         cout << "  server received " << messagein << " from IP " << inet_ntoa(si_client.sin_addr) << "port " << ntohs(si_client.sin_port) << endl;
 
-        // reverse messagein buffer
+        // encode messagein buffer
         string tmp = string(messagein);
-        string tmpResult = reverseArr(tmp);
-        strcpy(messageout, tmpResult.c_str());
-        messageout[readBytes] = '\0';
+
+        string tmpResult = to_string(hashFunction(tmp));
 
 #ifdef DEBUG
-        cout << "Server sending back the message: " << messageout << endl;
+        cout << "Server sending back the message: " << tmpResult << endl;
 #endif
 
         /* send the message back to the client */
-        sendto(s, messageout, readBytes, 0, client, len);
+        sendto(s, tmpResult.data(), tmpResult.length(), 0, client, len);
     }
 
     close(s);
