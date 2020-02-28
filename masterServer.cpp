@@ -173,29 +173,25 @@ int main()
                 /* print out the received message */
                 //cout << "Child process received word: " << messagein << endl;
 
-                //cout << "initial message received: " << endl;
+                // convert received message to string, for easier manipulation
                 string tmpMessageIn = string(messagein);
-                //cout << "tmpMessage: " << tmpMessageIn << endl;
 
                 int endPos = tmpMessageIn.find("#");
                 string command = tmpMessageIn.substr(0, endPos);
                 string message = tmpMessageIn.substr(endPos + 1);
                 string returntoClient;
-                // cout << "command: " << command << endl;
-                // cout << "message: " << message << endl;
 
+                // process menu options from client
                 for (int i = 0; i < command.length(); i++)
                 {
                     if (command[i] == '1')
                     {
                         if (i > 0)
                         {
-                            //cout << "i > 0; message: " << returntoClient << endl;
                             returntoClient = microServiceSock(ECHO, returntoClient);
                         }
                         else
                         {
-                            //cout << "else: message: " << message << endl;
                             returntoClient = microServiceSock(ECHO, message);
                         }
                     }

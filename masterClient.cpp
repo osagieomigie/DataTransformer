@@ -58,8 +58,8 @@ int main()
     struct sockaddr_in server;
     char message[MAX_WORD_LENGTH];
     char messageback[MAX_WORD_LENGTH];
-    int choice, initialChoice, len, bytes;
-    string command;
+    int choice, reuse, initialChoice, len, bytes;
+    string command, serverResponse;
 
     /* Initialization of server sockaddr data structure */
     memset(&server, 0, sizeof(server));
@@ -90,78 +90,91 @@ int main()
     /* main loop: read a word, send to server, and print answer received */
     while (choice != ALLDONE)
     {
+        bzero(messageback, MAX_WORD_LENGTH);
+        bzero(message, MAX_WORD_LENGTH);
         initialChoice = choice;
         len = 0;
 
-        if (choice == ECHO)
+        if (reuse == 1)
         {
-            /* get rid of newline after the (integer) menu choice given */
-            c = getchar();
-
-            /* prompt user for the input */
-            cout << "Enter your word: " << endl;
-
-            // encode microservice info
-            command = to_string(initialChoice) + "#";
-        }
-        else if (choice == REVERSE)
-        {
-            c = getchar();
-            cout << "Enter your word: " << endl;
-            command = to_string(initialChoice) + "#";
-        }
-        else if (choice == UPPER)
-        {
-            c = getchar();
-            cout << "Enter your word: " << endl;
-            command = to_string(initialChoice) + "#";
-        }
-        else if (choice == LOWER)
-        {
-            c = getchar();
-            cout << "Enter your word: " << endl;
-            command = to_string(initialChoice) + "#";
-        }
-        else if (choice == CAESER)
-        {
-            c = getchar();
-            cout << "Enter your word: " << endl;
-            command = to_string(initialChoice) + "#";
+            command = to_string(initialChoice) + "#" + serverResponse;
+            reuse = 0;
         }
         else
         {
-            c = getchar();
-            cout << "Enter your word: " << endl;
-            command = to_string(initialChoice) + "#";
+            if (choice == ECHO)
+            {
+                /* get rid of newline after the (integer) menu choice given */
+                c = getchar();
+
+                /* prompt user for the input */
+                cout << "Enter your word: " << endl;
+
+                // encode microservice info
+                command = to_string(initialChoice) + "#";
+            }
+            else if (choice == REVERSE)
+            {
+                c = getchar();
+                cout << "Enter your word: " << endl;
+                command = to_string(initialChoice) + "#";
+            }
+            else if (choice == UPPER)
+            {
+                c = getchar();
+                cout << "Enter your word: " << endl;
+                command = to_string(initialChoice) + "#";
+            }
+            else if (choice == LOWER)
+            {
+                c = getchar();
+                cout << "Enter your word: " << endl;
+                command = to_string(initialChoice) + "#";
+            }
+            else if (choice == CAESER)
+            {
+                c = getchar();
+                cout << "Enter your word: " << endl;
+                command = to_string(initialChoice) + "#";
+            }
+            else
+            {
+                c = getchar();
+                cout << "Enter your word: " << endl;
+                command = to_string(initialChoice) + "#";
+            }
+
+            while ((c = getchar()) != '\n')
+            {
+                message[len] = c;
+                len++;
+            }
+            /* make sure the message is null-terminated in C */
+            message[len] = '\0';
+
+            // append command to message
+            string stringMessage = string(message);
+            command += stringMessage;
         }
 
-        while ((c = getchar()) != '\n')
+        if (send(sockfd, command.data(), command.length(), 0) < 0)
         {
-            message[len] = c;
-            len++;
+            perror("send failed");
+            exit(-1);
         }
-        /* make sure the message is null-terminated in C */
-        message[len] = '\0';
-
-        string stringMessage = string(message);
-
-        command += stringMessage;
-
-        //cout << "sending " << command << " to server" << endl;
-
-        /* send it to the server via the socket */
-        send(sockfd, command.data(), command.length(), 0);
 
         /* see what the server sends back */
-        if ((bytes = recv(sockfd, messageback, len, 0)) > 0)
+        if ((bytes = recv(sockfd, messageback, command.length(), 0)) != -1)
         {
             /* make sure the message is null-terminated in C */
             messageback[bytes] = '\0';
             cout << "Answer received from server: " << messageback << endl;
+            serverResponse = string(messageback);
         }
         else
         {
             /* an error condition if the server dies unexpectedly */
+            perror("receive error");
             cout << "Sorry, dude. Server failed! " << endl;
             close(sockfd);
             exit(1);
@@ -169,6 +182,23 @@ int main()
 
         printmenu();
         scanf("%d", &choice);
+        cout << "\n";
+
+        // user wants to leave
+        if (choice == ALLDONE)
+        {
+            break;
+        }
+
+        // reuse previous word
+        cout << "   Press 1 to continue modifying word" << endl;
+        cout << "   Press 0 to enter new word" << endl;
+        scanf("%d", &reuse);
+        cout << "\n";
+
+        // reset buffers
+        bzero(messageback, MAX_WORD_LENGTH);
+        bzero(message, MAX_WORD_LENGTH);
     }
 
     /* Program all done, so clean up and exit the client */
