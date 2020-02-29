@@ -28,12 +28,6 @@ void perror(const char *s);
 
 /* Menu selections */
 #define ALLDONE 0
-#define ECHO 1
-#define REVERSE 2
-#define UPPER 3
-#define LOWER 4
-#define CAESER 5
-#define HASH 6
 
 using namespace std;
 
