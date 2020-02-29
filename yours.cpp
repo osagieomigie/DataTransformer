@@ -1,10 +1,10 @@
 /* Simple program to demonstrate a UDP-based server.
  * Loops forever.
  * Receives a word from the client. 
- * Uses a caser cipher to encode the word.
+ * Uses a simple hash function to encode the word.
  * sends response back to client.
  * 
- * Compile using "g++ -o caser caser.cpp"
+ * Compile using "g++ -o hash hash.cpp"
  */
 
 /* Include files */
@@ -88,7 +88,7 @@ int main()
         cout << "Could not bind to port " << PORT << endl;
         return 1;
     }
-    cout << "Welcome! I am the HASH server!!" << endl;
+    cout << "Welcome! I am the UDP HASH server!!" << endl;
     cout << "server now listening on UDP port " << PORT << "..." << endl;
 
     /* big loop, looking for incoming messages from clients */

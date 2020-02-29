@@ -54,7 +54,7 @@ int main()
         cout << "Could not bind to port " << PORT << endl;
         return 1;
     }
-    cout << "Welcome! I am the UDP echo server!!" << endl;
+    cout << "Welcome! I am the UDP identity server!!" << endl;
     cout << "server now listening on UDP port " << PORT << "..." << endl;
 
     /* big loop, looking for incoming messages from clients */

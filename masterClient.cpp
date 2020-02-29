@@ -24,10 +24,16 @@ void perror(const char *s);
 #define MAX_WORD_LENGTH 200000
 #define BYNAME 0
 #define VALID_ENTRY 1
-#define MYPORTNUM 12345 /* must match the server's port! */
+#define MYPORTNUM 12346 /* must match the server's port! */
 
 /* Menu selections */
 #define ALLDONE 0
+#define ECHO 1
+#define REVERSE 2
+#define UPPER 3
+#define LOWER 4
+#define CAESER 5
+#define HASH 6
 
 using namespace std;
 
@@ -41,7 +47,27 @@ void printmenu()
     cout << "       3. Upper case service" << endl;
     cout << "       4. Lower case service" << endl;
     cout << "       5. Caeser cipher service" << endl;
-    cout << "       6. Hash service" << endl;
+    cout << "       6. HASH service" << endl;
+}
+
+void errorHandling(int &tmp)
+{
+    if (cin.fail())
+    {
+        while (1)
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Enter in a valid option, choose from below: " << endl;
+            printmenu();
+            cin >> tmp;
+
+            if (!cin.fail())
+            {
+                break;
+            }
+        }
+    }
 }
 
 /* Main program of client */
@@ -79,7 +105,8 @@ int main()
     /* Print welcome banner */
     cout << "Welcome! I am the master server !!" << endl;
     printmenu();
-    scanf("%d", &choice);
+    cin >> choice;
+    errorHandling(choice); // event user enters in an incorrect value
 
     /* main loop: read a word, send to server, and print answer received */
     while (choice != ALLDONE)
@@ -99,18 +126,17 @@ int main()
             /* get rid of newline after the (integer) menu choice given */
             c = getchar();
 
-            // encode microservice info
-            command = to_string(initialChoice) + "#";
-
             /* prompt user for the input */
             cout << "Enter your word: " << endl;
+
+            // encode microservice info
+            command = to_string(initialChoice) + "#";
 
             while ((c = getchar()) != '\n')
             {
                 message[len] = c;
                 len++;
             }
-
             /* make sure the message is null-terminated in C */
             message[len] = '\0';
 
@@ -128,8 +154,6 @@ int main()
         /* see what the server sends back */
         if ((bytes = recv(sockfd, messageback, command.length(), 0)) != -1)
         {
-            /* make sure the message is null-terminated in C */
-            messageback[bytes] = '\0';
             cout << "Answer received from server: " << messageback << endl;
             serverResponse = string(messageback);
         }
@@ -143,8 +167,10 @@ int main()
         }
 
         printmenu();
-        scanf("%d", &choice);
+        cin >> choice;
         cout << "\n";
+
+        errorHandling(choice);
 
         // user wants to leave
         if (choice == ALLDONE)
@@ -155,7 +181,7 @@ int main()
         // reuse previous word
         cout << "   Press 1 to continue modifying word" << endl;
         cout << "   Press 0 to enter new word" << endl;
-        scanf("%d", &reuse);
+        cin >> reuse;
         cout << "\n";
 
         // reset buffers

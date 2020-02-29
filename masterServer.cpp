@@ -14,7 +14,7 @@
 #include <unistd.h>     // for close()
 #include <signal.h>
 
-#define MYPORTNUM 12345
+#define MYPORTNUM 12346
 #define MAX_MESSAGE_LENGTH 200000
 #define ECHO 8990
 #define REVERSE 8991
@@ -46,6 +46,9 @@ string microServiceSock(int port, string messageIn)
 {
     struct sockaddr_in si_server;
     struct sockaddr *server;
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000; // timer to 100ms
     int s, i = sizeof(si_server);
     socklen_t len = sizeof(si_server);
     char buf[MAX_MESSAGE_LENGTH];
@@ -75,6 +78,12 @@ string microServiceSock(int port, string messageIn)
     {
         cout << "sendto failed" << endl;
         exit(-1);
+    }
+
+    // if the udp server doesn't respond in time
+    if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    {
+        perror("Error");
     }
 
     if ((readBytes = recvfrom(s, buf, MAX_MESSAGE_LENGTH, 0, server, &len)) == -1)
@@ -124,7 +133,8 @@ int main()
     /* bind a specific address and port to the end point */
     if (bind(parentsockfd, (struct sockaddr *)&server, sizeof(struct sockaddr_in)) == -1)
     {
-        cout << "bind() call failed!" << endl;
+        //cout << "bind() call failed!" << endl;
+        perror("bind failed");
         exit(1);
     }
 
@@ -163,7 +173,6 @@ int main()
         }
         else if (pid == 0)
         {
-            /* the child process is the one doing the "then" part */
 
             /* don't need the parent listener socket that was inherited */
             close(parentsockfd);
@@ -172,7 +181,7 @@ int main()
             while (recv(childsockfd, messagein, MAX_MESSAGE_LENGTH, 0) > 0)
             {
                 /* print out the received message */
-                //cout << "Child process received word: " << messagein << endl;
+                cout << "Child process received word: " << messagein << endl;
 
                 // convert received message to string, for easier manipulation
                 string tmpMessageIn = string(messagein);

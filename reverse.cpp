@@ -3,7 +3,7 @@
  * Receives a word from the client. 
  * Reverses the word and sends it back to the client.
  * 
- * Compile using "g++ -o reserve reserve.cpp"
+ * Compile using "g++ -o reverse reverse.cpp"
  */
 
 /* Include files */

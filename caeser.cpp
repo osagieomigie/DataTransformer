@@ -4,7 +4,7 @@
  * Uses a caser cipher to encode the word.
  * sends response back to client.
  * 
- * Compile using "g++ -o caser caser.cpp"
+ * Compile using "g++ -o caeser caeser.cpp"
  */
 
 /* Include files */
